@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -60,6 +61,17 @@ const Portal = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [notifications, setNotifications] = useState(true);
   const [emailUpdates, setEmailUpdates] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (!userData) {
+      navigate('/');
+      return;
+    }
+    setUser(JSON.parse(userData));
+  }, [navigate]);
 
   const filteredArticles = mockArticles.filter(article =>
     article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -199,8 +211,12 @@ const Portal = () => {
                       <AvatarFallback className="bg-primary text-primary-foreground text-2xl">АП</AvatarFallback>
                     </Avatar>
                     <div className="space-y-1">
-                      <h3 className="text-2xl font-semibold">Алексей Петров</h3>
-                      <p className="text-muted-foreground">@alex_petrov</p>
+                      <h3 className="text-2xl font-semibold">
+                        {user?.first_name} {user?.last_name || ''}
+                      </h3>
+                      <p className="text-muted-foreground">
+                        {user?.username ? `@${user.username}` : `ID: ${user?.id}`}
+                      </p>
                       <Badge className="mt-2">Верифицированный</Badge>
                     </div>
                   </div>
@@ -221,7 +237,7 @@ const Portal = () => {
 
                     <div className="space-y-1">
                       <p className="text-sm text-muted-foreground">Telegram ID</p>
-                      <p className="font-medium font-mono">123456789</p>
+                      <p className="font-medium font-mono">{user?.id}</p>
                     </div>
 
                     <div className="space-y-1">
@@ -317,7 +333,16 @@ const Portal = () => {
                       Вы авторизованы через Telegram. Выход произойдет автоматически при закрытии сессии.
                     </p>
                   </div>
-                  <Button variant="outline" className="w-full gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="w-full gap-2"
+                    onClick={() => {
+                      localStorage.removeItem('user');
+                      localStorage.removeItem('session_token');
+                      toast.success('Вы вышли из системы');
+                      navigate('/');
+                    }}
+                  >
                     <Icon name="LogOut" size={18} />
                     Выйти из аккаунта
                   </Button>

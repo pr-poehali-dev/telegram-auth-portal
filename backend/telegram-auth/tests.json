@@ -1,0 +1,24 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS request for CORS",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": "",
+      "bodyMatcher": "exact"
+    },
+    {
+      "name": "POST without token returns error",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "id": "123456789",
+        "first_name": "Test",
+        "hash": "invalid"
+      },
+      "expectedStatus": 401,
+      "bodyMatcher": "partial"
+    }
+  ]
+}
